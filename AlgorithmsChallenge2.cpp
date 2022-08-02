@@ -89,8 +89,6 @@ bool CheckTraversal(Node* start, Node* destination, std::vector<Path*> paths)
                 destinationNode->SetPathWeight(currStack[i]->GetWeight() + destinationNode->GetHeuristic() + startNode->GetPathWeight());
                 destinationNode->SetPreviousNode(currNode);
             }
-            
-            //curr node is the top of the queue
         }
 
         //remove the current node from the travel queue because it is done
@@ -112,8 +110,10 @@ bool CheckTraversal(Node* start, Node* destination, std::vector<Path*> paths)
             {
                 travelQueue.push(needToSortArr->at(i));
             }
+            //the front of the queue will now be the currentnode for the next iteration of the while loop
             currNode = travelQueue.front();
         }
+
         needToSortArr->clear();
         currStack.clear();
     }
@@ -163,7 +163,7 @@ void RemoveDuplicates(std::vector<Node*>* arrayToRemoveDupes)
 
 void DisplayResults(Node* startingNode, Node* destinationNode)
 {
-    //Display function
+    //Go through nodes via a Nodes PreviousNode to create the path
     Node* currNode = destinationNode;
     std::cout << "The shortest path to " << destinationNode->GetLetter() << " from " << startingNode->GetLetter() << " has the weight of : " << destinationNode->GetPathWeight() << " and the path goes from ";
     while (currNode->GetPreviousNode() != nullptr)
