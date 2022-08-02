@@ -1,113 +1,26 @@
 #include <iostream>
 #include <stack>
 #include <queue>
-
-class Node {
-protected:
-    char m_letter;
-    int m_heuristic;
-    int m_currPathWeight;
-    Node* m_previousNode;
-public:
-    Node(char letter, int heuristic, int currPathWeight, Node* previousNode)
-        :m_letter(letter)
-        ,m_heuristic(heuristic)
-        ,m_currPathWeight(currPathWeight)
-        ,m_previousNode(previousNode)
-    {
-
-    }
-
-    ~Node()
-    {
-
-    }
-
-    char GetLetter()
-    {
-        return m_letter;
-    }
-
-    int GetHeuristic()
-    {
-        return m_heuristic;
-    }
-    
-    int GetPathWeight()
-    {
-        return m_currPathWeight;
-    }
-
-    void SetPathWeight(int weight)
-    {
-        m_currPathWeight = weight;
-    }
-
-    void SetPreviousNode(Node* previousNode)
-    {
-        m_previousNode = previousNode;
-    }
-
-    Node* GetPreviousNode()
-    {
-        return m_previousNode;
-    }
-};
-
-class Path {
-protected:
-    Node* m_start;
-    Node* m_destination;
-    int m_weight;
-public:
-    Path(Node* start, Node* destination, int weight)
-        :m_start(start)
-        , m_destination(destination)
-        , m_weight(weight)
-    {
-
-    }
-
-    ~Path()
-    {
-        delete m_start;
-        m_start = nullptr;
-        delete m_destination;
-        m_destination = nullptr;
-    }
-
-    Node* GetStart()
-    {
-        return m_start;
-    }
-
-    Node* GetDestination()
-    {
-        return m_destination;
-    }
-
-    int GetWeight()
-    {
-        return m_weight;
-    }
-};
+#include "Node.h"
+#include "Path.h"
 
 int CheckTraversal(Node* start, Node* destination, std::vector<Path*> paths);
 void BubbleSortArray(std::vector<Node*>* arr);
-
+void DisplayResults(Node* startingNode, Node* destinationNode);
+void RemoveDuplicates(std::vector<Node*>* arr);
 
 int main()
 {
-    Node* nodeA = new Node('A', 0, 0, nullptr);
-    Node* nodeB = new Node('B', 0, -1, nullptr);
-    Node* nodeC = new Node('C', 0, -1, nullptr);
+    Node* nodeA = new Node('A', 5, 0, nullptr);
+    Node* nodeB = new Node('B', 4, -1, nullptr);
+    Node* nodeC = new Node('C', 2, -1, nullptr);
     Node* nodeD = new Node('D', 0, -1, nullptr);
     Node* nodeY = new Node('Y', 0, -1, nullptr);
     Node* nodeZ = new Node('Z', 0, -1, nullptr);
 
     Path* pathAB = new Path(nodeA, nodeB, 5);
     Path* pathBC = new Path(nodeB, nodeC, 1);
-    Path* pathAD = new Path(nodeA, nodeD, 10);
+    Path* pathAD = new Path(nodeA, nodeD, 7);
     Path* pathCD = new Path(nodeC, nodeD, 1);
     Path* pathYZ = new Path(nodeY, nodeZ, 10);
 
@@ -119,31 +32,21 @@ int main()
     paths.push_back(pathCD);
     paths.push_back(pathYZ);
 
-    int isTraversalPossible = CheckTraversal(nodeA, nodeD, paths);
+    Node* startingNode = nodeA;
+    Node* destinationNode = nodeD;
+
+    int isTraversalPossible = CheckTraversal(startingNode, nodeD, paths);
 
     if (isTraversalPossible != -1)
     {
-        Node* currNode = nodeD;
-        std::cout << "The shortest path to D from A is has the weight of: " << nodeD->GetPathWeight() << " and the path goes from ";
-        while (currNode->GetPreviousNode() != nullptr)
-        {
-            if (currNode->GetPreviousNode()->GetPreviousNode() != nullptr)
-            {
-                std::cout << currNode->GetLetter() << "<-----";
-            }
-            else
-            {
-                std::cout << currNode->GetLetter() << "<-----" << currNode->GetPreviousNode()->GetLetter();
-            }
-            currNode = currNode->GetPreviousNode();
-        }
+        DisplayResults(startingNode, destinationNode);
     }
 }
 
 int CheckTraversal(Node* start, Node* destination, std::vector<Path*> paths)
 {
-    std::queue<Node*> travelQueue;
     Node* currNode = start;
+    std::queue<Node*> travelQueue;
     std::vector<Path*> currStack;
     std::vector<Node*>* needToSortArr = new std::vector<Node*>;
 
@@ -201,8 +104,10 @@ int CheckTraversal(Node* start, Node* destination, std::vector<Path*> paths)
                 needToSortArr->push_back(travelQueue.front());
                 travelQueue.pop();
             }
+            RemoveDuplicates(needToSortArr);
             BubbleSortArray(needToSortArr);
 
+            //put the sorted array back into the travel queue
             for (int i = 0; i < needToSortArr->size(); i++)
             {
                 travelQueue.push(needToSortArr->at(i));
@@ -232,5 +137,45 @@ void BubbleSortArray(std::vector<Node*>* arrayToSort)
                 arrayToSort->at(i+1) = temp;
             }
         }
+    }
+}
+
+void RemoveDuplicates(std::vector<Node*>* arrayToRemoveDupes)
+{
+    for (int i = 0; i < arrayToRemoveDupes->size() - 1; i++)
+    {
+        for (int y = i + 1; y < arrayToRemoveDupes->size(); y++)
+        {
+            if (arrayToRemoveDupes->at(i)->GetLetter() == arrayToRemoveDupes->at(y)->GetLetter())
+            {
+                if (arrayToRemoveDupes->at(i)->GetPathWeight() >= arrayToRemoveDupes->at(y)->GetPathWeight())
+                {
+                    arrayToRemoveDupes->erase(std::next(arrayToRemoveDupes->begin(), i));
+                }
+                else
+                {
+                    arrayToRemoveDupes->erase(std::next(arrayToRemoveDupes->begin(), y));
+                }
+            }
+        }
+    }
+}
+
+void DisplayResults(Node* startingNode, Node* destinationNode)
+{
+    //Display function
+    Node* currNode = destinationNode;
+    std::cout << "The shortest path to " << destinationNode->GetLetter() << " from " << startingNode->GetLetter() << " has the weight of : " << destinationNode->GetPathWeight() << " and the path goes from ";
+    while (currNode->GetPreviousNode() != nullptr)
+    {
+        if (currNode->GetPreviousNode()->GetPreviousNode() != nullptr)
+        {
+            std::cout << currNode->GetLetter() << "<-----";
+        }
+        else
+        {
+            std::cout << currNode->GetLetter() << "<-----" << currNode->GetPreviousNode()->GetLetter();
+        }
+        currNode = currNode->GetPreviousNode();
     }
 }
