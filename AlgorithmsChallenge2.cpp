@@ -4,7 +4,7 @@
 #include "Node.h"
 #include "Path.h"
 
-int CheckTraversal(Node* start, Node* destination, std::vector<Path*> paths);
+bool CheckTraversal(Node* start, Node* destination, std::vector<Path*> paths);
 void BubbleSortArray(std::vector<Node*>* arr);
 void DisplayResults(Node* startingNode, Node* destinationNode);
 void RemoveDuplicates(std::vector<Node*>* arr);
@@ -35,15 +35,15 @@ int main()
     Node* startingNode = nodeA;
     Node* destinationNode = nodeD;
 
-    int isTraversalPossible = CheckTraversal(startingNode, nodeD, paths);
+    bool isTraversalPossible = CheckTraversal(startingNode, nodeD, paths);
 
-    if (isTraversalPossible != -1)
+    if (isTraversalPossible)
     {
         DisplayResults(startingNode, destinationNode);
     }
 }
 
-int CheckTraversal(Node* start, Node* destination, std::vector<Path*> paths)
+bool CheckTraversal(Node* start, Node* destination, std::vector<Path*> paths)
 {
     Node* currNode = start;
     std::queue<Node*> travelQueue;
@@ -56,7 +56,7 @@ int CheckTraversal(Node* start, Node* destination, std::vector<Path*> paths)
     {
         if (currNode == destination)
         {
-            return currNode->GetPathWeight();
+            return true;
         }
 
         //For loop to get all of the paths connected to the current node 
@@ -118,7 +118,7 @@ int CheckTraversal(Node* start, Node* destination, std::vector<Path*> paths)
         currStack.clear();
     }
     std::cout << "There is no path from " << start->GetLetter() << " to " << destination->GetLetter();
-    return -1;
+    return false;
     
 }
 
